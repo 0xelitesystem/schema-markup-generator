@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schema Markup Generator</title>
+<meta name="description" content="Generate JSON-LD schema markup for 12 types: LocalBusiness, SoftwareApplication, Article, Person, Product, FAQPage, Course, VideoObject, Organization, Event, Recipe, Review. Browser-only.">
+<meta property="og:title" content="Schema Markup Generator">
+<meta property="og:description" content="Generate JSON-LD for 12 schema types. Validated against Schema.org. Browser-only, no signup.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://0xelitesystem.github.io/schema-markup-generator/og.png">
+<meta property="og:url" content="https://0xelitesystem.github.io/schema-markup-generator/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Schema Markup Generator">
+<meta name="twitter:description" content="Generate JSON-LD for 12 schema types.">
+<meta name="twitter:image" content="https://0xelitesystem.github.io/schema-markup-generator/og.png">
+<style>
+:root {
+  --bg: #f7f4ed;
+  --bg-card: #ffffff;
+  --bg-input: #fbf9f3;
+  --ink: #2a3a2d;
+  --ink-soft: #5a6a5d;
+  --ink-faint: #8a9a8d;
+  --rule: #c8d4c0;
+  --sage: #5a7a5f;
+  --moss: #3d5a40;
+  --coral: #d97757;
+  --good: #3d5a40;
+  --warn: #b07028;
+  --bad: #b03838;
+  --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Consolas, monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+}
+[data-theme="dark"] {
+  --bg: #0f1410;
+  --bg-card: #1a2018;
+  --bg-input: #14191510;
+  --ink: #e4ead2;
+  --ink-soft: #a8b0a0;
+  --ink-faint: #6a7268;
+  --rule: #2a3a2d;
+  --sage: #8aa890;
+  --moss: #a8c2ae;
+  --coral: #e8927a;
+  --good: #8aa890;
+  --warn: #d4a548;
+  --bad: #d97070;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14.5px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+.wrap { max-width: 1280px; margin: 0 auto; padding: 32px 28px 80px; }
+header {
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 2px solid var(--sage);
+}
+.brand h1 {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+  color: var(--moss);
+}
+.brand .sub {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+}
+.theme-toggle {
+  background: transparent;
+  border: 1.5px solid var(--sage);
+  color: var(--moss);
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 20px;
+}
+[data-theme="dark"] .theme-toggle { color: var(--sage); }
+.theme-toggle:hover { background: var(--sage); color: var(--bg-card); }
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.type-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 14px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+  transition: all 0.15s;
+}
+.type-btn .type-label { font-weight: 600; }
+.type-btn .type-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+  font-family: var(--serif);
+  font-style: italic;
+}
+.type-btn:hover { border-color: var(--sage); }
+.type-btn.active { background: var(--sage); border-color: var(--sage); color: var(--bg-card); }
+.type-btn.active .type-hint { color: rgba(255,255,255,0.85); }
+[data-theme="dark"] .type-btn.active { background: var(--moss); color: var(--bg); }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+@media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 26px;
+}
+.card h2 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+  color: var(--moss);
+}
+.card .h2-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 22px;
+  font-family: var(--mono);
+}
+[data-theme="dark"] .card h2 { color: var(--sage); }
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 11.5px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.field label .req { color: var(--coral); }
+.field input, .field textarea, .field select {
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 9px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  border-radius: 5px;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none;
+  border-color: var(--sage);
+}
+.field textarea { resize: vertical; min-height: 60px; font-family: var(--sans); }
+.field .hint { font-size: 11px; color: var(--ink-faint); margin-top: 4px; font-family: var(--serif); font-style: italic; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.array-list { display: flex; flex-direction: column; gap: 6px; }
+.array-item { display: grid; grid-template-columns: 1fr 30px; gap: 6px; }
+.btn-icon {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  height: 38px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn-icon:hover { border-color: var(--coral); color: var(--coral); }
+.add-btn {
+  background: transparent;
+  border: 1px dashed var(--sage);
+  color: var(--sage);
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.add-btn:hover { background: var(--sage); color: var(--bg-card); }
+
+.preview {
+  background: var(--bg-input);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 540px;
+  color: var(--ink);
+}
+.preview .key { color: var(--coral); }
+.preview .str { color: var(--sage); }
+.preview .num { color: var(--moss); }
+
+.validations { margin-top: 16px; padding: 14px 16px; background: var(--bg-input); border: 1px solid var(--rule); border-radius: 5px; }
+.validations h3 {
+  font-size: 11px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px 0;
+  color: var(--ink-soft);
+}
+.val-item { font-size: 12.5px; padding: 3px 0; display: flex; align-items: center; gap: 8px; }
+.val-item .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.val-item.good .dot { background: var(--good); }
+.val-item.warn .dot { background: var(--warn); }
+.val-item.bad .dot { background: var(--bad); }
+.val-item.good { color: var(--good); }
+.val-item.warn { color: var(--warn); }
+.val-item.bad { color: var(--bad); }
+
+.actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 11px 20px;
+  border: 1.5px solid var(--moss);
+  background: var(--moss);
+  color: var(--bg-card);
+  cursor: pointer;
+  border-radius: 22px;
+}
+.btn:hover { background: var(--coral); border-color: var(--coral); }
+.btn.secondary { background: transparent; color: var(--moss); }
+[data-theme="dark"] .btn { background: var(--sage); border-color: var(--sage); color: var(--bg); }
+[data-theme="dark"] .btn.secondary { background: transparent; color: var(--sage); }
+.btn.secondary:hover { background: var(--coral); border-color: var(--coral); color: var(--bg-card); }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--moss);
+  color: var(--bg-card);
+  padding: 10px 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+footer {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+}
+footer a { color: var(--coral); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+.use-block {
+  background: var(--bg-input);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 18px;
+  font-family: var(--serif);
+  font-style: italic;
+}
+</style>
+</head>
+<body data-theme="light">
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Schema Markup Generator</h1>
+      <div class="sub">JSON-LD specimens for the structured-data field guide</div>
+    </div>
+    <button class="theme-toggle" id="theme-toggle">Dark mode</button>
+  </header>
+
+  <div class="type-grid" id="type-grid"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="form-title">LocalBusiness</h2>
+      <div class="h2-sub" id="form-sub">A physical business with a street address that serves customers in person.</div>
+      <div id="form-fields"></div>
+    </div>
+
+    <div class="card">
+      <h2>Generated JSON-LD</h2>
+      <div class="h2-sub">Paste this in &lt;script type="application/ld+json"&gt; in the &lt;head&gt; or before &lt;/body&gt;.</div>
+      <pre class="preview" id="preview"></pre>
+      <div class="validations">
+        <h3>Validation</h3>
+        <div id="val-list"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="copy-btn">Copy JSON-LD</button>
+        <button class="btn secondary" id="copy-tag">Copy with &lt;script&gt; tag</button>
+        <button class="btn secondary" id="download-btn">Download</button>
+      </div>
+      <div class="use-block">
+        Validate against Google Rich Results Test and the Schema.org validator before deploying. Both are free and catch errors this tool cannot.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/0xelitesystem" target="_blank" rel="noopener">0xelitesystem</a>. Pairs with <a href="https://github.com/0xelitesystem/structured-data-examples" target="_blank" rel="noopener">structured-data-examples</a>, <a href="https://github.com/0xelitesystem/llms-txt-generator" target="_blank" rel="noopener">llms-txt-generator</a>, and <a href="https://github.com/0xelitesystem/e-e-a-t-auditor" target="_blank" rel="noopener">e-e-a-t-auditor</a>.
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+const $ = (id) => document.getElementById(id);
+
+const SCHEMA_TYPES = {
+  LocalBusiness: {
+    label: 'LocalBusiness',
+    hint: 'Physical storefront',
+    desc: 'A physical business with a street address that serves customers in person.',
+    fields: [
+      { key: 'name', label: 'Business name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'url', label: 'Website URL', type: 'url', required: true },
+      { key: 'telephone', label: 'Phone', type: 'text' },
+      { key: 'streetAddress', label: 'Street address', type: 'text', required: true },
+      { key: 'addressLocality', label: 'City', type: 'text', required: true },
+      { key: 'addressRegion', label: 'State or region', type: 'text', required: true },
+      { key: 'postalCode', label: 'Postal code', type: 'text', required: true },
+      { key: 'addressCountry', label: 'Country code (US, GB)', type: 'text', required: true, value: 'US' },
+      { key: 'latitude', label: 'Latitude', type: 'text' },
+      { key: 'longitude', label: 'Longitude', type: 'text' },
+      { key: 'priceRange', label: 'Price range ($, $$, $$$)', type: 'text' },
+      { key: 'openingHours', label: 'Opening hours (one per line: Mo-Fr 09:00-17:00)', type: 'textarea' },
+      { key: 'image', label: 'Image URL', type: 'url' },
+      { key: 'sameAs', label: 'Social profiles (one URL per line)', type: 'textarea' }
+    ]
+  },
+  SoftwareApplication: {
+    label: 'SoftwareApplication',
+    hint: 'SaaS or app',
+    desc: 'A software product, web app, or SaaS tool.',
+    fields: [
+      { key: 'name', label: 'App name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'url', label: 'Product URL', type: 'url', required: true },
+      { key: 'applicationCategory', label: 'Category (DeveloperApplication, BusinessApplication)', type: 'text', required: true, value: 'BusinessApplication' },
+      { key: 'operatingSystem', label: 'Operating system (Web, iOS, Android, Windows)', type: 'text', required: true, value: 'Web' },
+      { key: 'price', label: 'Price (0 for free)', type: 'text', value: '0' },
+      { key: 'priceCurrency', label: 'Currency code (USD)', type: 'text', value: 'USD' },
+      { key: 'image', label: 'Screenshot URL', type: 'url' },
+      { key: 'softwareVersion', label: 'Version', type: 'text' },
+      { key: 'aggregateRating_value', label: 'Rating value (only if real reviews exist)', type: 'text' },
+      { key: 'aggregateRating_count', label: 'Rating count', type: 'text' }
+    ]
+  },
+  Article: {
+    label: 'Article',
+    hint: 'Blog post or news',
+    desc: 'A blog post, news article, or other written editorial content.',
+    fields: [
+      { key: 'headline', label: 'Headline', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'url', label: 'Article URL', type: 'url', required: true },
+      { key: 'image', label: 'Featured image URL', type: 'url', required: true },
+      { key: 'datePublished', label: 'Publish date (YYYY-MM-DD)', type: 'text', required: true },
+      { key: 'dateModified', label: 'Last modified (YYYY-MM-DD)', type: 'text' },
+      { key: 'author_name', label: 'Author name', type: 'text', required: true },
+      { key: 'author_url', label: 'Author profile URL', type: 'url' },
+      { key: 'publisher_name', label: 'Publisher name', type: 'text', required: true },
+      { key: 'publisher_logo', label: 'Publisher logo URL', type: 'url' },
+      { key: 'articleSection', label: 'Section or category', type: 'text' },
+      { key: 'wordCount', label: 'Word count', type: 'text' }
+    ]
+  },
+  Person: {
+    label: 'Person',
+    hint: 'Author or founder',
+    desc: 'A real person: founder, author, instructor, public figure.',
+    fields: [
+      { key: 'name', label: 'Full name', type: 'text', required: true },
+      { key: 'description', label: 'Bio (1 to 2 sentences)', type: 'textarea', required: true },
+      { key: 'url', label: 'Personal site URL', type: 'url', required: true },
+      { key: 'image', label: 'Photo URL', type: 'url' },
+      { key: 'jobTitle', label: 'Job title', type: 'text' },
+      { key: 'worksFor_name', label: 'Company name', type: 'text' },
+      { key: 'worksFor_url', label: 'Company URL', type: 'url' },
+      { key: 'sameAs', label: 'Social profiles (one URL per line)', type: 'textarea' },
+      { key: 'knowsAbout', label: 'Expertise areas (one per line)', type: 'textarea' }
+    ]
+  },
+  Product: {
+    label: 'Product',
+    hint: 'Physical or digital good',
+    desc: 'A product offered for sale: physical, digital, or service-bundle.',
+    fields: [
+      { key: 'name', label: 'Product name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'image', label: 'Image URL', type: 'url', required: true },
+      { key: 'brand', label: 'Brand name', type: 'text' },
+      { key: 'sku', label: 'SKU', type: 'text' },
+      { key: 'price', label: 'Price', type: 'text', required: true },
+      { key: 'priceCurrency', label: 'Currency code', type: 'text', value: 'USD' },
+      { key: 'availability', label: 'Availability (InStock, OutOfStock, PreOrder)', type: 'text', value: 'InStock' },
+      { key: 'url', label: 'Product URL', type: 'url', required: true }
+    ]
+  },
+  FAQPage: {
+    label: 'FAQPage',
+    hint: 'Q&A list',
+    desc: 'A page that lists frequently asked questions and answers.',
+    fields: [
+      { key: 'url', label: 'Page URL', type: 'url', required: true },
+      { key: 'faqs', label: 'FAQ entries', type: 'faq-list', required: true }
+    ]
+  },
+  Course: {
+    label: 'Course',
+    hint: 'Educational program',
+    desc: 'An educational course, class, or training program.',
+    fields: [
+      { key: 'name', label: 'Course name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'url', label: 'Course URL', type: 'url', required: true },
+      { key: 'provider_name', label: 'Provider name', type: 'text', required: true },
+      { key: 'provider_url', label: 'Provider URL', type: 'url' },
+      { key: 'instructor_name', label: 'Instructor name', type: 'text' },
+      { key: 'instructor_url', label: 'Instructor profile URL', type: 'url' },
+      { key: 'courseMode', label: 'Mode (online, onsite, blended)', type: 'text', value: 'online' },
+      { key: 'inLanguage', label: 'Language code (en, es)', type: 'text', value: 'en' },
+      { key: 'image', label: 'Course image URL', type: 'url' }
+    ]
+  },
+  VideoObject: {
+    label: 'VideoObject',
+    hint: 'YouTube or video page',
+    desc: 'A video with transcript and metadata for search and AI engines.',
+    fields: [
+      { key: 'name', label: 'Video title', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'thumbnailUrl', label: 'Thumbnail URL', type: 'url', required: true },
+      { key: 'uploadDate', label: 'Upload date (YYYY-MM-DD)', type: 'text', required: true },
+      { key: 'duration', label: 'Duration (ISO 8601, e.g. PT5M33S)', type: 'text' },
+      { key: 'contentUrl', label: 'Video file URL', type: 'url' },
+      { key: 'embedUrl', label: 'Embed URL', type: 'url' },
+      { key: 'transcript', label: 'Full transcript', type: 'textarea' }
+    ]
+  },
+  Organization: {
+    label: 'Organization',
+    hint: 'Company or brand',
+    desc: 'A company, brand, or organization without a physical retail location.',
+    fields: [
+      { key: 'name', label: 'Organization name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'url', label: 'Website URL', type: 'url', required: true },
+      { key: 'logo', label: 'Logo URL', type: 'url' },
+      { key: 'foundingDate', label: 'Founding date (YYYY)', type: 'text' },
+      { key: 'email', label: 'Contact email', type: 'text' },
+      { key: 'telephone', label: 'Phone', type: 'text' },
+      { key: 'sameAs', label: 'Social profiles (one URL per line)', type: 'textarea' }
+    ]
+  },
+  Event: {
+    label: 'Event',
+    hint: 'Webinar, conference',
+    desc: 'A scheduled event: webinar, conference, course session, or in-person gathering.',
+    fields: [
+      { key: 'name', label: 'Event name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'startDate', label: 'Start (ISO 8601: 2026-06-15T14:00:00Z)', type: 'text', required: true },
+      { key: 'endDate', label: 'End (ISO 8601)', type: 'text' },
+      { key: 'eventStatus', label: 'Status (EventScheduled, EventPostponed, EventCancelled)', type: 'text', value: 'EventScheduled' },
+      { key: 'eventAttendanceMode', label: 'Attendance (OnlineEventAttendanceMode, OfflineEventAttendanceMode, MixedEventAttendanceMode)', type: 'text', value: 'OnlineEventAttendanceMode' },
+      { key: 'location_name', label: 'Venue name (or "Online")', type: 'text' },
+      { key: 'location_url', label: 'Venue URL (or webinar URL)', type: 'url' },
+      { key: 'organizer_name', label: 'Organizer name', type: 'text' },
+      { key: 'organizer_url', label: 'Organizer URL', type: 'url' },
+      { key: 'url', label: 'Event page URL', type: 'url', required: true },
+      { key: 'image', label: 'Image URL', type: 'url' }
+    ]
+  },
+  Recipe: {
+    label: 'Recipe',
+    hint: 'Cooking recipe',
+    desc: 'A cooking recipe with ingredients, steps, and timing.',
+    fields: [
+      { key: 'name', label: 'Recipe name', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'image', label: 'Image URL', type: 'url', required: true },
+      { key: 'author_name', label: 'Author name', type: 'text', required: true },
+      { key: 'datePublished', label: 'Publish date (YYYY-MM-DD)', type: 'text' },
+      { key: 'prepTime', label: 'Prep time (ISO 8601: PT15M)', type: 'text' },
+      { key: 'cookTime', label: 'Cook time (ISO 8601)', type: 'text' },
+      { key: 'recipeYield', label: 'Yield (e.g. "4 servings")', type: 'text' },
+      { key: 'recipeIngredient', label: 'Ingredients (one per line)', type: 'textarea', required: true },
+      { key: 'recipeInstructions', label: 'Instructions (one step per line)', type: 'textarea', required: true }
+    ]
+  },
+  Review: {
+    label: 'Review',
+    hint: 'Product or service review',
+    desc: 'A review of a product, service, business, or other item.',
+    fields: [
+      { key: 'itemReviewed_name', label: 'Item being reviewed (name)', type: 'text', required: true },
+      { key: 'itemReviewed_type', label: 'Item type (Product, LocalBusiness, Book, Movie)', type: 'text', required: true, value: 'Product' },
+      { key: 'itemReviewed_url', label: 'Item URL', type: 'url' },
+      { key: 'reviewRating_value', label: 'Rating value (1 to 5)', type: 'text', required: true },
+      { key: 'reviewRating_best', label: 'Best rating (usually 5)', type: 'text', value: '5' },
+      { key: 'author_name', label: 'Reviewer name', type: 'text', required: true },
+      { key: 'reviewBody', label: 'Review text', type: 'textarea', required: true },
+      { key: 'datePublished', label: 'Review date (YYYY-MM-DD)', type: 'text', required: true }
+    ]
+  }
+};
+
+let currentType = 'LocalBusiness';
+let formState = {};
+let faqList = [{ q: '', a: '' }];
+
+function renderTypeGrid() {
+  const grid = $('type-grid');
+  grid.innerHTML = '';
+  Object.entries(SCHEMA_TYPES).forEach(([key, info]) => {
+    const btn = document.createElement('button');
+    btn.className = 'type-btn' + (key === currentType ? ' active' : '');
+    btn.dataset.type = key;
+    btn.innerHTML = `<span class="type-label">${info.label}</span><span class="type-hint">${info.hint}</span>`;
+    btn.addEventListener('click', () => { selectType(key); });
+    grid.appendChild(btn);
+  });
+}
+
+function selectType(type) {
+  currentType = type;
+  formState = {};
+  faqList = [{ q: '', a: '' }];
+  // Pre-fill defaults
+  SCHEMA_TYPES[type].fields.forEach(f => {
+    if (f.value !== undefined) formState[f.key] = f.value;
+  });
+  renderTypeGrid();
+  renderForm();
+  renderPreview();
+}
+
+function renderForm() {
+  const info = SCHEMA_TYPES[currentType];
+  $('form-title').textContent = info.label;
+  $('form-sub').textContent = info.desc;
+  const container = $('form-fields');
+  container.innerHTML = '';
+
+  info.fields.forEach(f => {
+    if (f.type === 'faq-list') {
+      const wrap = document.createElement('div');
+      wrap.className = 'field';
+      wrap.innerHTML = `<label>FAQ entries ${f.required ? '<span class="req">*</span>' : ''}</label>`;
+      const list = document.createElement('div');
+      list.id = 'faq-list-container';
+      wrap.appendChild(list);
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-btn';
+      addBtn.textContent = '+ Add question';
+      addBtn.addEventListener('click', (e) => { e.preventDefault(); faqList.push({ q: '', a: '' }); renderFaqList(); renderPreview(); });
+      wrap.appendChild(addBtn);
+      container.appendChild(wrap);
+      renderFaqList();
+      return;
+    }
+    const div = document.createElement('div');
+    div.className = 'field';
+    const val = formState[f.key] !== undefined ? formState[f.key] : '';
+    const reqMark = f.required ? '<span class="req">*</span>' : '';
+    if (f.type === 'textarea') {
+      div.innerHTML = `<label>${f.label} ${reqMark}</label><textarea data-key="${f.key}">${escapeHtml(val)}</textarea>`;
+    } else {
+      div.innerHTML = `<label>${f.label} ${reqMark}</label><input type="${f.type === 'url' ? 'url' : 'text'}" data-key="${f.key}" value="${escapeAttr(val)}">`;
+    }
+    container.appendChild(div);
+  });
+}
+
+function renderFaqList() {
+  const container = $('faq-list-container');
+  if (!container) return;
+  container.innerHTML = '';
+  faqList.forEach((faq, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '10px';
+    wrap.style.padding = '10px';
+    wrap.style.background = 'var(--bg-input)';
+    wrap.style.border = '1px solid var(--rule)';
+    wrap.style.borderRadius = '5px';
+    wrap.innerHTML = `
+      <input type="text" data-faq-idx="${idx}" data-faq-field="q" value="${escapeAttr(faq.q)}" placeholder="Question" style="width: 100%; padding: 8px 10px; background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; font-size: 13px; margin-bottom: 6px;">
+      <textarea data-faq-idx="${idx}" data-faq-field="a" placeholder="Answer (30-100 words, self-contained, fact-rich)" style="width: 100%; padding: 8px 10px; background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; font-size: 13px; min-height: 50px;">${escapeHtml(faq.a)}</textarea>
+      <button class="btn-icon" data-remove-faq="${idx}" style="margin-top: 6px; width: auto; padding: 4px 12px; font-size: 12px;">Remove</button>
+    `;
+    container.appendChild(wrap);
+  });
+}
+
+function escapeHtml(s) { return String(s||'').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escapeAttr(s) { return String(s||'').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset.key) {
+    formState[t.dataset.key] = t.value;
+    renderPreview();
+  } else if (t.dataset.faqIdx !== undefined) {
+    const idx = parseInt(t.dataset.faqIdx, 10);
+    if (faqList[idx]) {
+      faqList[idx][t.dataset.faqField] = t.value;
+      renderPreview();
+    }
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.dataset.removeFaq !== undefined) {
+    const idx = parseInt(e.target.dataset.removeFaq, 10);
+    faqList.splice(idx, 1);
+    if (faqList.length === 0) faqList.push({ q: '', a: '' });
+    renderFaqList();
+    renderPreview();
+  }
+});
+
+function buildJsonLd() {
+  const type = currentType;
+  const obj = { '@context': 'https://schema.org', '@type': type };
+  const s = formState;
+
+  const setIf = (k, v) => { if (v) obj[k] = v; };
+  const arrayFromLines = (v) => v ? v.split('\n').map(x => x.trim()).filter(Boolean) : null;
+
+  if (type === 'LocalBusiness') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('url', s.url);
+    setIf('telephone', s.telephone);
+    if (s.streetAddress || s.addressLocality) {
+      obj.address = { '@type': 'PostalAddress' };
+      setIf.call(obj.address, 'streetAddress', s.streetAddress);
+      if (s.streetAddress) obj.address.streetAddress = s.streetAddress;
+      if (s.addressLocality) obj.address.addressLocality = s.addressLocality;
+      if (s.addressRegion) obj.address.addressRegion = s.addressRegion;
+      if (s.postalCode) obj.address.postalCode = s.postalCode;
+      if (s.addressCountry) obj.address.addressCountry = s.addressCountry;
+    }
+    if (s.latitude && s.longitude) obj.geo = { '@type': 'GeoCoordinates', latitude: s.latitude, longitude: s.longitude };
+    setIf('priceRange', s.priceRange);
+    if (s.openingHours) {
+      const hours = s.openingHours.split('\n').map(x => x.trim()).filter(Boolean);
+      if (hours.length) obj.openingHours = hours.length === 1 ? hours[0] : hours;
+    }
+    setIf('image', s.image);
+    const sameAs = arrayFromLines(s.sameAs);
+    if (sameAs) obj.sameAs = sameAs;
+  }
+
+  else if (type === 'SoftwareApplication') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('url', s.url);
+    setIf('applicationCategory', s.applicationCategory);
+    setIf('operatingSystem', s.operatingSystem);
+    setIf('image', s.image);
+    setIf('softwareVersion', s.softwareVersion);
+    if (s.price !== undefined && s.price !== '') {
+      obj.offers = { '@type': 'Offer', price: s.price, priceCurrency: s.priceCurrency || 'USD' };
+    }
+    if (s.aggregateRating_value && s.aggregateRating_count) {
+      obj.aggregateRating = { '@type': 'AggregateRating', ratingValue: s.aggregateRating_value, ratingCount: s.aggregateRating_count };
+    }
+  }
+
+  else if (type === 'Article') {
+    setIf('headline', s.headline);
+    setIf('description', s.description);
+    setIf('image', s.image);
+    setIf('datePublished', s.datePublished);
+    setIf('dateModified', s.dateModified || s.datePublished);
+    setIf('articleSection', s.articleSection);
+    setIf('wordCount', s.wordCount ? parseInt(s.wordCount, 10) : null);
+    if (s.url) obj.mainEntityOfPage = { '@type': 'WebPage', '@id': s.url };
+    if (s.author_name) {
+      obj.author = { '@type': 'Person', name: s.author_name };
+      if (s.author_url) obj.author.url = s.author_url;
+    }
+    if (s.publisher_name) {
+      obj.publisher = { '@type': 'Organization', name: s.publisher_name };
+      if (s.publisher_logo) obj.publisher.logo = { '@type': 'ImageObject', url: s.publisher_logo };
+    }
+  }
+
+  else if (type === 'Person') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('url', s.url);
+    setIf('image', s.image);
+    setIf('jobTitle', s.jobTitle);
+    if (s.worksFor_name) {
+      obj.worksFor = { '@type': 'Organization', name: s.worksFor_name };
+      if (s.worksFor_url) obj.worksFor.url = s.worksFor_url;
+    }
+    const sameAs = arrayFromLines(s.sameAs);
+    if (sameAs) obj.sameAs = sameAs;
+    const knowsAbout = arrayFromLines(s.knowsAbout);
+    if (knowsAbout) obj.knowsAbout = knowsAbout;
+  }
+
+  else if (type === 'Product') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('image', s.image);
+    if (s.brand) obj.brand = { '@type': 'Brand', name: s.brand };
+    setIf('sku', s.sku);
+    setIf('url', s.url);
+    if (s.price) {
+      obj.offers = {
+        '@type': 'Offer',
+        price: s.price,
+        priceCurrency: s.priceCurrency || 'USD',
+        availability: `https://schema.org/${s.availability || 'InStock'}`,
+        url: s.url || ''
+      };
+    }
+  }
+
+  else if (type === 'FAQPage') {
+    setIf('url', s.url);
+    const validFaqs = faqList.filter(f => f.q && f.a);
+    obj.mainEntity = validFaqs.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a }
+    }));
+  }
+
+  else if (type === 'Course') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('url', s.url);
+    setIf('inLanguage', s.inLanguage);
+    setIf('image', s.image);
+    if (s.provider_name) {
+      obj.provider = { '@type': 'Organization', name: s.provider_name };
+      if (s.provider_url) obj.provider.url = s.provider_url;
+    }
+    if (s.instructor_name) {
+      obj.instructor = { '@type': 'Person', name: s.instructor_name };
+      if (s.instructor_url) obj.instructor.url = s.instructor_url;
+    }
+    if (s.courseMode) {
+      obj.hasCourseInstance = { '@type': 'CourseInstance', courseMode: s.courseMode };
+    }
+  }
+
+  else if (type === 'VideoObject') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('thumbnailUrl', s.thumbnailUrl);
+    setIf('uploadDate', s.uploadDate);
+    setIf('duration', s.duration);
+    setIf('contentUrl', s.contentUrl);
+    setIf('embedUrl', s.embedUrl);
+    setIf('transcript', s.transcript);
+  }
+
+  else if (type === 'Organization') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('url', s.url);
+    setIf('logo', s.logo);
+    setIf('foundingDate', s.foundingDate);
+    setIf('email', s.email);
+    setIf('telephone', s.telephone);
+    const sameAs = arrayFromLines(s.sameAs);
+    if (sameAs) obj.sameAs = sameAs;
+  }
+
+  else if (type === 'Event') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('startDate', s.startDate);
+    setIf('endDate', s.endDate);
+    setIf('url', s.url);
+    setIf('image', s.image);
+    if (s.eventStatus) obj.eventStatus = `https://schema.org/${s.eventStatus}`;
+    if (s.eventAttendanceMode) obj.eventAttendanceMode = `https://schema.org/${s.eventAttendanceMode}`;
+    if (s.location_name) {
+      const isOnline = (s.eventAttendanceMode || '').includes('Online');
+      obj.location = isOnline
+        ? { '@type': 'VirtualLocation', url: s.location_url || s.url }
+        : { '@type': 'Place', name: s.location_name, url: s.location_url };
+    }
+    if (s.organizer_name) {
+      obj.organizer = { '@type': 'Organization', name: s.organizer_name };
+      if (s.organizer_url) obj.organizer.url = s.organizer_url;
+    }
+  }
+
+  else if (type === 'Recipe') {
+    setIf('name', s.name);
+    setIf('description', s.description);
+    setIf('image', s.image);
+    setIf('datePublished', s.datePublished);
+    setIf('prepTime', s.prepTime);
+    setIf('cookTime', s.cookTime);
+    setIf('recipeYield', s.recipeYield);
+    if (s.author_name) obj.author = { '@type': 'Person', name: s.author_name };
+    const ingredients = arrayFromLines(s.recipeIngredient);
+    if (ingredients) obj.recipeIngredient = ingredients;
+    const steps = arrayFromLines(s.recipeInstructions);
+    if (steps) obj.recipeInstructions = steps.map(text => ({ '@type': 'HowToStep', text }));
+  }
+
+  else if (type === 'Review') {
+    if (s.itemReviewed_name) {
+      obj.itemReviewed = { '@type': s.itemReviewed_type || 'Product', name: s.itemReviewed_name };
+      if (s.itemReviewed_url) obj.itemReviewed.url = s.itemReviewed_url;
+    }
+    if (s.reviewRating_value) {
+      obj.reviewRating = {
+        '@type': 'Rating',
+        ratingValue: s.reviewRating_value,
+        bestRating: s.reviewRating_best || '5'
+      };
+    }
+    if (s.author_name) obj.author = { '@type': 'Person', name: s.author_name };
+    setIf('reviewBody', s.reviewBody);
+    setIf('datePublished', s.datePublished);
+  }
+
+  return obj;
+}
+
+function validate() {
+  const issues = [];
+  const fields = SCHEMA_TYPES[currentType].fields;
+  const required = fields.filter(f => f.required);
+  required.forEach(f => {
+    if (f.type === 'faq-list') {
+      const valid = faqList.filter(x => x.q && x.a);
+      if (valid.length === 0) issues.push({ level: 'bad', msg: 'At least one valid FAQ entry required' });
+    } else if (!formState[f.key]) {
+      issues.push({ level: 'bad', msg: `Missing required: ${f.label}` });
+    }
+  });
+
+  if (formState.url && !/^https:\/\//.test(formState.url)) {
+    issues.push({ level: 'warn', msg: 'URL should start with https://' });
+  }
+  if (formState.image && !/^https:\/\//.test(formState.image)) {
+    issues.push({ level: 'warn', msg: 'Image URL should be absolute https://' });
+  }
+  if (currentType === 'Article') {
+    if (formState.headline && formState.headline.length > 110) {
+      issues.push({ level: 'warn', msg: 'Article headline is over 110 characters; Google may truncate' });
+    }
+  }
+  if (formState.aggregateRating_value && !formState.aggregateRating_count) {
+    issues.push({ level: 'warn', msg: 'aggregateRating needs both value and count to be valid' });
+  }
+  if (issues.length === 0) issues.push({ level: 'good', msg: 'All required fields present' });
+  return issues;
+}
+
+function renderValidations() {
+  const issues = validate();
+  $('val-list').innerHTML = issues.map(i =>
+    `<div class="val-item ${i.level}"><span class="dot"></span><span>${escapeHtml(i.msg)}</span></div>`
+  ).join('');
+}
+
+function renderPreview() {
+  const obj = buildJsonLd();
+  $('preview').textContent = JSON.stringify(obj, null, 2);
+  renderValidations();
+}
+
+$('copy-btn').addEventListener('click', async () => {
+  const txt = JSON.stringify(buildJsonLd(), null, 2);
+  try {
+    await navigator.clipboard.writeText(txt);
+    showToast('JSON-LD copied');
+  } catch (err) {
+    showToast('Copy failed');
+  }
+});
+
+$('copy-tag').addEventListener('click', async () => {
+  const txt = `<script type="application/ld+json">\n${JSON.stringify(buildJsonLd(), null, 2)}\n</` + `script>`;
+  try {
+    await navigator.clipboard.writeText(txt);
+    showToast('Copied with script tag');
+  } catch (err) {
+    showToast('Copy failed');
+  }
+});
+
+$('download-btn').addEventListener('click', () => {
+  const txt = JSON.stringify(buildJsonLd(), null, 2);
+  const blob = new Blob([txt], { type: 'application/ld+json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentType.toLowerCase()}-schema.jsonld`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Downloaded');
+});
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+$('theme-toggle').addEventListener('click', () => {
+  const cur = document.body.dataset.theme;
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = next;
+  $('theme-toggle').textContent = next === 'dark' ? 'Light mode' : 'Dark mode';
+});
+
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.body.dataset.theme = 'dark';
+  $('theme-toggle').textContent = 'Light mode';
+}
+
+selectType('LocalBusiness');
+</script>
+</body>
+</html>
