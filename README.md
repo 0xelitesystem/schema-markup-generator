@@ -72,6 +72,10 @@ Both are free. Both catch errors this tool cannot.
 - [e-e-a-t-auditor](https://github.com/0xelitesystem/e-e-a-t-auditor): audit pages for E-E-A-T signals including schema presence
 - [ai-citability-scorer](https://github.com/0xelitesystem/ai-citability-scorer): score content passages for AI citation likelihood
 
+## More
+
+Part of a catalog of single-file browser tools and plain-language references, all MIT licensed and dependency-free: [0xelitesystem.github.io](https://0xelitesystem.github.io/). Built by [elitesystem.ai](https://elitesystem.ai).
+
 ## License
 
 MIT. Free to use, fork, modify, and ship.
