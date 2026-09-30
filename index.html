@@ -41,7 +41,7 @@
   --bg-input: #14191510;
   --ink: #e4ead2;
   --ink-soft: #a8b0a0;
-  --ink-faint: #6a7268;
+  --ink-faint: #898983;
   --rule: #2a3a2d;
   --sage: #8aa890;
   --moss: #a8c2ae;
@@ -130,6 +130,7 @@ header {
 .type-btn.active { background: var(--sage); border-color: var(--sage); color: var(--bg-card); }
 .type-btn.active .type-hint { color: rgba(255,255,255,0.85); }
 [data-theme="dark"] .type-btn.active { background: var(--moss); color: var(--bg); }
+[data-theme="dark"] .type-btn.active .type-hint { color: #1a2018; }
 
 .grid {
   display: grid;
@@ -316,7 +317,7 @@ footer a:hover { text-decoration: underline; }
   --bg-input: #111110;
   --good: #7ddc7d;
   --ink: #e8e8e3;
-  --ink-faint: #6e6e68;
+  --ink-faint: #898983;
   --ink-soft: #a8a8a3;
   --rule: #1f1f1d;
   --warn: #ffb454;
@@ -326,11 +327,13 @@ footer a:hover { text-decoration: underline; }
   --bg: #e8ebef;
   --bg-card: #dee2e8;
   --bg-input: #dee2e8;
+  --coral: #94513b;
   --good: #1a5c2e;
   --ink: #0a0a0a;
-  --ink-faint: #6e6e68;
+  --ink-faint: #5c5c56;
   --ink-soft: #2a2a27;
   --rule: #c8cdd5;
+  --sage: #4e6a53;
   --warn: #8a4d00;
 }
 :root { color-scheme: dark; }
@@ -647,9 +650,9 @@ function renderForm() {
     const val = formState[f.key] !== undefined ? formState[f.key] : '';
     const reqMark = f.required ? '<span class="req">*</span>' : '';
     if (f.type === 'textarea') {
-      div.innerHTML = `<label>${f.label} ${reqMark}</label><textarea data-key="${f.key}">${escapeHtml(val)}</textarea>`;
+      div.innerHTML = `<label for="fld-${f.key}">${f.label} ${reqMark}</label><textarea id="fld-${f.key}" data-key="${f.key}">${escapeHtml(val)}</textarea>`;
     } else {
-      div.innerHTML = `<label>${f.label} ${reqMark}</label><input type="${f.type === 'url' ? 'url' : 'text'}" data-key="${f.key}" value="${escapeAttr(val)}">`;
+      div.innerHTML = `<label for="fld-${f.key}">${f.label} ${reqMark}</label><input type="${f.type === 'url' ? 'url' : 'text'}" id="fld-${f.key}" data-key="${f.key}" value="${escapeAttr(val)}">`;
     }
     container.appendChild(div);
   });
@@ -667,8 +670,8 @@ function renderFaqList() {
     wrap.style.border = '1px solid var(--rule)';
     wrap.style.borderRadius = '5px';
     wrap.innerHTML = `
-      <input type="text" data-faq-idx="${idx}" data-faq-field="q" value="${escapeAttr(faq.q)}" placeholder="Question" style="width: 100%; padding: 8px 10px; background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; font-size: 13px; margin-bottom: 6px;">
-      <textarea data-faq-idx="${idx}" data-faq-field="a" placeholder="Answer (30-100 words, self-contained, fact-rich)" style="width: 100%; padding: 8px 10px; background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; font-size: 13px; min-height: 50px;">${escapeHtml(faq.a)}</textarea>
+      <input type="text" data-faq-idx="${idx}" data-faq-field="q" aria-label="Question ${idx + 1}" value="${escapeAttr(faq.q)}" placeholder="Question" style="width: 100%; padding: 8px 10px; background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; font-size: 13px; margin-bottom: 6px;">
+      <textarea data-faq-idx="${idx}" data-faq-field="a" aria-label="Answer ${idx + 1}" placeholder="Answer (30-100 words, self-contained, fact-rich)" style="width: 100%; padding: 8px 10px; background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; font-size: 13px; min-height: 50px;">${escapeHtml(faq.a)}</textarea>
       <button class="btn-icon" data-remove-faq="${idx}" style="margin-top: 6px; width: auto; padding: 4px 12px; font-size: 12px;">Remove</button>
     `;
     container.appendChild(wrap);
@@ -1016,11 +1019,8 @@ selectType('LocalBusiness');
 (function () {
   var KEY = "theme";
   var btn = document.querySelector("#theme-toggle, #theme-btn, .theme-btn, .theme-toggle, [data-theme-toggle]");
-  function host() {
-    if (document.documentElement.hasAttribute("data-theme")) { return document.documentElement; }
-    if (document.body && document.body.hasAttribute("data-theme")) { return document.body; }
-    return document.documentElement;
-  }
+  // This page's own toggle switches <body> while <html> keeps a fixed brand theme, so remember <body>.
+  function host() { return document.body || document.documentElement; }
   function current() { return host().getAttribute("data-theme") || ""; }
   function setter() {
     if (typeof setTheme === "function") { return setTheme; }
