@@ -27,7 +27,7 @@ Paste your page details, pick a schema type, get a validated JSON-LD block ready
 | Recipe | Cooking recipes |
 | Review | Product or service reviews |
 
-## Use it
+## Use
 
 Open `index.html` in any browser. Or visit `https://0xelitesystem.github.io/schema-markup-generator/`.
 
@@ -36,6 +36,10 @@ Open `index.html` in any browser. Or visit `https://0xelitesystem.github.io/sche
 3. JSON-LD updates live in the right panel.
 4. Click "Copy JSON-LD" for the raw object, or "Copy with script tag" for paste-ready HTML.
 5. Drop into your page `<head>` or just before `</body>`.
+
+## Why this exists
+
+Hand-writing JSON-LD means looking up each type's properties and catching syntax slips by eye. This generator builds the block from a form and flags common mistakes. It is one HTML file with no tracking and no network calls. MIT licensed.
 
 ## Validation it does
 
@@ -71,6 +75,23 @@ Both are free. Both catch errors this tool cannot.
 - [llms-txt-generator](https://github.com/0xelitesystem/llms-txt-generator): generate llms.txt for AI engine discovery
 - [e-e-a-t-auditor](https://github.com/0xelitesystem/e-e-a-t-auditor): audit pages for E-E-A-T signals including schema presence
 - [ai-citability-scorer](https://github.com/0xelitesystem/ai-citability-scorer): score content passages for AI citation likelihood
+
+## Privacy
+
+Everything runs in your browser. No network requests, no analytics, no third-party scripts. What you type into the form is not saved, so a refresh clears it. If you click the theme toggle, your light or dark choice is saved in your browser's localStorage under the key `theme`. Nothing else is stored.
+
+## Run locally
+
+```bash
+git clone https://github.com/0xelitesystem/schema-markup-generator
+cd schema-markup-generator
+```
+
+Open `index.html` in any browser. Or serve the folder with `python -m http.server 8000` and visit http://localhost:8000/.
+
+## Build
+
+No build step. The whole tool is one `index.html` file with its CSS and JavaScript inline.
 
 ## More
 
